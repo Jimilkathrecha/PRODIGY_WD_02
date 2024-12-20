@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+    <div class="w-[600px] mx-auto flex justify-center items-center h-[100vh]">
+
+        <div class="bg-black rounded-[40px] w-[180px] h-[220px] text-center absolute m-auto left-0 right-0 top-0 bottom-0">
+            <div id="stopwatch-time" class="counting mt-[10px] font-mono font-bold text-white text-[30px]">00:00:00</div>
+
+            <div class="flex flex-col gap-1 mt-3">
+                <div class="flex justify-around gap-1 w-[95%] mx-[auto]">
+                    <button id="start-button" class="w-[50%]">
+                        <div class="px-[9px] w-[100%] rounded-[20px] bg-[#ffff]">
+                            Start
+                        </div>
+                    </button>
+                    <button id="pause-button" class="w-[50%]">
+                        <div class="px-[9px] w-[100%] rounded-[20px] bg-[#ffff]">
+                            Pause
+                        </div>
+                    </button>
+                </div>
+
+                <div class="flex justify-around gap-1 w-[95%] mx-[auto]">
+                    <button id="lap-button" class="w-[50%]">
+                        <div class="px-[9px] w-[100%] rounded-[20px] bg-[#ffff]">
+                            Lap
+                        </div>
+                    </button>
+                    <button id="reset-button" class="w-[50%]">
+                        <div class="px-[9px] w-[100%] rounded-[20px] bg-[#ffff]">
+                            Reset
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-y-scroll scroll-d-none mt-[10px] h-[80px]">
+                <p class="text-white text-start w-fit ps-4" id="stopwatch-laps"></p>
+            </div>
+        </div>
+
+        <div class="w-100 flex items-center ">
+            <img class="mx-auto w-[600px]" src="../../Watch1.png" alt="">
+        </div>
+
+    </div>
+
+    <script>
+        class Stopwatch {
+            constructor() {
+                this.startTime = 0; // Timestamp when the stopwatch started
+                this.elapsedTime = 0; // Total elapsed time in milliseconds
+                this.timerInterval = null; // Reference to the interval timer
+                this.laps = []; // Array to store lap times
+            }
+
+            // Start the stopwatch
+            start() {
+                if (!this.timerInterval) {
+                    this.startTime = Date.now() - this.elapsedTime;
+                    this.timerInterval = setInterval(() => {
+                        this.elapsedTime = Date.now() - this.startTime;
+                        this.updateTimeDisplay();
+                    }, 100); // Update every 100ms
+                }
+            }
+
+            // Pause the stopwatch
+            pause() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            // Reset the stopwatch
+            reset() {
+                this.pause();
+                this.elapsedTime = 0;
+                this.startTime = 0;
+                this.laps = [];
+                this.updateTimeDisplay();
+                this.updateLapDisplay();
+            }
+
+            // Add a lap
+            addLap() {
+                const lapTime = this.formatTime(this.elapsedTime);
+                this.laps.push(lapTime);
+                this.updateLapDisplay();
+            }
+
+            // Format time in mm:ss:ms
+            formatTime(milliseconds) {
+                const minutes = Math.floor(milliseconds / 60000);
+                const seconds = Math.floor((milliseconds % 60000) / 1000);
+                const ms = Math.floor((milliseconds % 1000) / 10);
+                return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(ms).padStart(2, '0')}`;
+            }
+
+            // Update the time display on the UI
+            updateTimeDisplay() {
+                const display = document.getElementById('stopwatch-time');
+                if (display) {
+                    display.textContent = this.formatTime(this.elapsedTime);
+                }
+            }
+
+            // Update the lap display on the UI
+            updateLapDisplay() {
+                const lapContainer = document.getElementById('stopwatch-laps');
+                if (lapContainer) {
+                    lapContainer.innerHTML = this.laps
+                        .map((lap, index) => `<p>Lap ${index + 1} : ${lap}</p>`)
+                        .join('');
+                }
+            }
+        }
+
+        // Instantiate the stopwatch
+        const stopwatch = new Stopwatch();
+
+        // Button event listeners
+        document.getElementById('start-button').addEventListener('click', () => stopwatch.start());
+        document.getElementById('pause-button').addEventListener('click', () => stopwatch.pause());
+        document.getElementById('lap-button').addEventListener('click', () => stopwatch.addLap());
+        document.getElementById('reset-button').addEventListener('click', () => stopwatch.reset());
+
+    </script>
+</body>
+
+</html>
